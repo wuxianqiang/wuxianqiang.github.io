@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Node,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Node的 http 模块只对HTTP报文的头部进行了解析，然后触发 request 事件。如果请求中还带有内容部分（如 POST 请求，它具有报头和内容），内容部分需要用户自行接收和解析。">
+<meta name="keywords" content="Node">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Node中POST请求的正确处理方式">
+<meta property="og:url" content="https://wuxianqiang.github.io/2019/06/30/post/index.html">
+<meta property="og:site_name" content="前端精髓">
+<meta property="og:description" content="Node的 http 模块只对HTTP报文的头部进行了解析，然后触发 request 事件。如果请求中还带有内容部分（如 POST 请求，它具有报头和内容），内容部分需要用户自行接收和解析。">
+<meta property="og:locale" content="zh">
+<meta property="og:image" content="https://wuxianqiang.github.io/2019/06/30/post/banner.jpg">
+<meta property="og:image" content="https://wuxianqiang.github.io/2019/06/30/post/post.png">
+<meta property="og:updated_time" content="2020-03-14T04:22:19.197Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Node中POST请求的正确处理方式">
+<meta name="twitter:description" content="Node的 http 模块只对HTTP报文的头部进行了解析，然后触发 request 事件。如果请求中还带有内容部分（如 POST 请求，它具有报头和内容），内容部分需要用户自行接收和解析。">
+<meta name="twitter:image" content="https://wuxianqiang.github.io/2019/06/30/post/banner.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://wuxianqiang.github.io/2019/06/30/post/">
+
+
+
+
+
+  <title>Node中POST请求的正确处理方式 | 前端精髓</title>
+  
+
+
+
+
+
+
+
+
+</head>
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">前端精髓</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">致力于用技术去推动和改变前端开发</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://wuxianqiang.github.io/2019/06/30/post/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Qiang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="前端精髓">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Node中POST请求的正确处理方式</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-30T18:38:48+00:00">
+                2019-06-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <img src="/2019/06/30/post/banner.jpg" title="图片">
+<p>Node的 http 模块只对HTTP报文的头部进行了解析，然后触发 <code>request</code> 事件。如果请求中还带有内容部分（如 POST 请求，它具有报头和内容），内容部分需要用户自行接收和解析。</p>
+<a id="more"></a>
+<p>通过报头的 <code>Transfer-Encoding</code> 或 <code>Content-Length</code> 即可判断请求中是否带有内容</p>
+<table>
+<thead>
+<tr>
+<th>字段名称</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Transfer-Encoding</td>
+<td>指定报文主体的传输编码方式</td>
+</tr>
+<tr>
+<td>Content-Length</td>
+<td>报文主体的大小</td>
+</tr>
+</tbody>
+</table>
+<p>写个方法判断是否有报文主体<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> hasBody = <span class="function"><span class="keyword">function</span>(<span class="params">req</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span>  <span class="string">'transfer-encoding'</span>  <span class="keyword">in</span>  req.headers  ||  <span class="string">'content-length'</span> <span class="keyword">in</span> req.headers;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<h1 id="接收数据"><a href="#接收数据" class="headerlink" title="接收数据"></a>接收数据</h1><p>报文内容部分会通过 <code>data</code> 事件触发，我们只需以流的方式处理即可，不要在订阅 <code>data</code> 事件的时候使用 <code>+=</code> 的形式拼装数据，这样会乱码的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">handle</span>(<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (hasBody(req)) &#123;</span><br><span class="line">    <span class="keyword">var</span> buffers = [];</span><br><span class="line">    req.on(<span class="string">'data'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">chunk</span>) </span>&#123;</span><br><span class="line">      buffers.push(chunk);</span><br><span class="line">    &#125;);</span><br><span class="line">    req.on(<span class="string">'end'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">const</span> POST = Buffer.concat(buffers).toString();</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="1-POST发送的是表单的数据"><a href="#1-POST发送的是表单的数据" class="headerlink" title="1. POST发送的是表单的数据"></a>1. POST发送的是表单的数据</h2><p>如果在页面中使用表单提交一个post请求，我们的代码大概是这样的。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;form action=<span class="string">"/upload"</span> method=<span class="string">"post"</span>&gt;</span><br><span class="line">  &lt;label <span class="keyword">for</span>=<span class="string">"username"</span>&gt;用户名:<span class="xml"><span class="tag">&lt;/<span class="name">label</span>&gt;</span></span></span><br><span class="line">  &lt;input type=<span class="string">"text"</span> name=<span class="string">"username"</span> id=<span class="string">"username"</span> /&gt;</span><br><span class="line">  &lt;label <span class="keyword">for</span>=<span class="string">"password"</span>&gt;密码:<span class="xml"><span class="tag">&lt;/<span class="name">label</span>&gt;</span></span></span><br><span class="line">  &lt;input type=<span class="string">"password"</span> name=<span class="string">"password"</span> id=<span class="string">"password"</span> /&gt;</span><br><span class="line">  &lt;input type=<span class="string">"submit"</span> /&gt;</span><br><span class="line">&lt;<span class="regexp">/form&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>默认的表单提交，请求头中的 <code>Content-Type</code> 字段值为 <code>application/x-www-form-urlencoded</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: application/x-www-form-urlencoded</span><br></pre></td></tr></table></figure></p>
+<p>写一个判断内容类型的方法<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> mime = <span class="function"><span class="keyword">function</span> (<span class="params">req</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> str = req.headers[<span class="string">'content-type'</span>] || <span class="string">''</span>;</span><br><span class="line">  <span class="keyword">return</span> str.split(<span class="string">';'</span>)[<span class="number">0</span>];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>它的报文体内容跟查询字符串相同<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username=Tom&amp;password=123456</span><br></pre></td></tr></table></figure></p>
+<p>解析表单数据使用<code>querystring</code>模块中的<code>parse</code>方法<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> querystring = <span class="built_in">require</span>(<span class="string">'querystring'</span>)</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">handleForm</span> (<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> isFrom = mime(req) === <span class="string">'application/x-www-form-urlencoded'</span></span><br><span class="line">  <span class="keyword">if</span> (hasBody(req) &amp;&amp; isFrom) &#123;</span><br><span class="line">    <span class="keyword">var</span> buffers = [];</span><br><span class="line">    req.on(<span class="string">'data'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">chunk</span>) </span>&#123;</span><br><span class="line">      buffers.push(chunk);</span><br><span class="line">    &#125;);</span><br><span class="line">    req.on(<span class="string">'end'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">let</span> requestBody = Buffer.concat(buffers).toString();</span><br><span class="line">      requestBody = querystring.parse(requestBody)</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-POST发送的是JSON的数据"><a href="#2-POST发送的是JSON的数据" class="headerlink" title="2. POST发送的是JSON的数据"></a>2. POST发送的是JSON的数据</h2><p>如果在页面中使用axios发送post请求，我们的代码大概是这样的。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">axios.post(<span class="string">'/user'</span>, &#123;</span><br><span class="line">  username: <span class="string">'Tom'</span>,</span><br><span class="line">  password: <span class="string">'123456'</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>默认的JSON提交，请求头中的 <code>Content-Type</code> 字段值为 <code>application/json</code>，在 <code>Content-Type</code> 中可能还附带编码信息 <code>charset=utf-8</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: application/json; charset=utf-8</span><br></pre></td></tr></table></figure></p>
+<p>它的报文体内容跟JSON格式的字符串相同<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">"name"</span>: <span class="string">"Tom"</span>,</span><br><span class="line">  <span class="string">"password"</span>: <span class="string">"123456"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>解析JSON数据使用 <code>JSON.parse</code> 方法。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">handleJson</span> (<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> isJson = mime(req) === <span class="string">'application/json'</span></span><br><span class="line">  <span class="keyword">if</span> (hasBody(req) &amp;&amp; isJson) &#123;</span><br><span class="line">    <span class="keyword">var</span> buffers = [];</span><br><span class="line">    req.on(<span class="string">'data'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">chunk</span>) </span>&#123;</span><br><span class="line">      buffers.push(chunk);</span><br><span class="line">    &#125;);</span><br><span class="line">    req.on(<span class="string">'end'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">let</span> requestBody = Buffer.concat(buffers).toString();</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        requestBody = <span class="built_in">JSON</span>.parse(requestBody)</span><br><span class="line">      &#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(error)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="3-POST发送的是文件数据"><a href="#3-POST发送的是文件数据" class="headerlink" title="3. POST发送的是文件数据"></a>3. POST发送的是文件数据</h2><p>如果在页面中使用表单提交文件请求，我们的代码大概是这样的。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;form action=<span class="string">"/upload"</span> method=<span class="string">"post"</span> enctype=<span class="string">"multipart/form-data"</span>&gt;</span><br><span class="line">  &lt;input type=<span class="string">"file"</span> name=<span class="string">"avatar"</span> id=<span class="string">"avatar"</span>&gt;</span><br><span class="line">  &lt;input type=<span class="string">"submit"</span> /&gt;</span><br><span class="line">&lt;<span class="regexp">/form&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>默认的上传文件提交，请求头中的 <code>Content-Type</code> 字段值为<code>multipart/form-data</code>，在 <code>Content-Type</code> 中可能还附带内容分隔符 <code>boundary=----WebKitFormBoundary4Hsing01Izo2AHqv</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: multipart/form-data; boundary=----WebKitFormBoundary4Hsing01Izo2AHqv</span><br></pre></td></tr></table></figure></p>
+<p>先上传一个JS文件，看看报文主体里面的格式大概是这样的，包含文件信息和文件内容，有指定的分隔符包裹。</p>
+<img src="/2019/06/30/post/post.png" title="图片">
+<p>上传文件的时候是要区分文本文件和二进制文件，文本文件是要使用 <code>utf8</code> 编码(HTML，CSS，JavaScript)，二进制文件是要使用 <code>binary</code> 编码(图片，视频，音频)</p>
+<p>根据内容分隔符解析上传的图片，并且写入到文件中，下面代码暂时只处理图片格式的文件。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">handleFile</span>(<span class="params">req, res</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> isFile = mime(req) === <span class="string">'multipart/form-data'</span></span><br><span class="line">  <span class="keyword">if</span> (hasBody(req) &amp;&amp; isFile) &#123;</span><br><span class="line">    <span class="keyword">var</span> buffers = [];</span><br><span class="line">    req.on(<span class="string">'data'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">chunk</span>) </span>&#123;</span><br><span class="line">      buffers.push(chunk);</span><br><span class="line">    &#125;);</span><br><span class="line">    req.on(<span class="string">'end'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="comment">// 处理文件名</span></span><br><span class="line">      <span class="keyword">let</span> requestBody = Buffer.concat(buffers).toString(<span class="string">'binary'</span>);</span><br><span class="line">      <span class="keyword">let</span> file = querystring.parse(requestBody, <span class="string">'\r\n'</span>, <span class="string">': '</span>)</span><br><span class="line">      <span class="keyword">let</span> fileInfo = file[<span class="string">'Content-Disposition'</span>]</span><br><span class="line">      fileInfo = Buffer.from(fileInfo, <span class="string">'binary'</span>).toString()</span><br><span class="line">      <span class="keyword">let</span> &#123; filename &#125; = querystring.parse(fileInfo, <span class="string">'; '</span>, <span class="string">'='</span>)</span><br><span class="line">      filename = filename.slice(<span class="number">1</span>, <span class="number">-1</span>)</span><br><span class="line">      filename = <span class="string">`./static/<span class="subst">$&#123;filename&#125;</span>`</span></span><br><span class="line">      <span class="comment">// 处理内容</span></span><br><span class="line">      <span class="keyword">let</span> boundary = req.headers[<span class="string">'content-type'</span>].split(<span class="string">'; '</span>)[<span class="number">1</span>].replace(<span class="string">'boundary='</span>, <span class="string">''</span>);</span><br><span class="line">      <span class="keyword">let</span> contentType = file[<span class="string">'Content-Type'</span>]</span><br><span class="line">      <span class="keyword">if</span> (!contentType.includes(<span class="string">'image'</span>)) <span class="keyword">return</span></span><br><span class="line">      <span class="keyword">let</span> upperBoundary = requestBody.indexOf(contentType) + contentType.length;</span><br><span class="line">      <span class="keyword">let</span> shorterData = requestBody.substring(upperBoundary)</span><br><span class="line">      <span class="keyword">let</span> binaryDataAlmost = shorterData.trim()</span><br><span class="line">      <span class="keyword">let</span> binaryData = binaryDataAlmost.substring(<span class="number">0</span>, binaryDataAlmost.indexOf(<span class="string">`--<span class="subst">$&#123;boundary&#125;</span>--`</span>))</span><br><span class="line">      <span class="comment">// 写入文件</span></span><br><span class="line">      fs.writeFile(filename, binaryData, <span class="string">'binary'</span>, (err) =&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> (err) &#123;</span><br><span class="line">          <span class="built_in">console</span>.log(<span class="string">'上传失败'</span>)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="built_in">console</span>.log(<span class="string">'上传成功'</span>, filename)</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这就是所有处理POST请求的方式，你都学会了吗？</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Node/" rel="tag"># Node</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/06/30/redux/" rel="next" title="深入浅出redux知识">
+                <i class="fa fa-chevron-left"></i> 深入浅出redux知识
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/06/30/process/" rel="prev" title="多进程架构">
+                多进程架构 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Qiang</p>
+              <p class="site-description motion-element" itemprop="description">前端开发工程师</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">116</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#接收数据"><span class="nav-number">1.</span> <span class="nav-text">接收数据</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-POST发送的是表单的数据"><span class="nav-number">1.1.</span> <span class="nav-text">1. POST发送的是表单的数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-POST发送的是JSON的数据"><span class="nav-number">1.2.</span> <span class="nav-text">2. POST发送的是JSON的数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-POST发送的是文件数据"><span class="nav-number">1.3.</span> <span class="nav-text">3. POST发送的是文件数据</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Qiang</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+  <div class="footer-custom">Follow <a target="_blank" href="https://github.com/wuxianqiang">GitHub</a></div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="shell是什么？Shell基本上是一个命令解释器，类似于DOS下的command。它接收用户命令（如ls等），然后调用相应的应用程序。">
+<meta name="keywords" content="Linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="shell基础">
+<meta property="og:url" content="https://wuxianqiang.github.io/2019/07/04/shell/index.html">
+<meta property="og:site_name" content="前端精髓">
+<meta property="og:description" content="shell是什么？Shell基本上是一个命令解释器，类似于DOS下的command。它接收用户命令（如ls等），然后调用相应的应用程序。">
+<meta property="og:locale" content="zh">
+<meta property="og:image" content="https://wuxianqiang.github.io/2019/07/04/shell/banner.jpg">
+<meta property="og:updated_time" content="2020-03-14T04:22:19.217Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="shell基础">
+<meta name="twitter:description" content="shell是什么？Shell基本上是一个命令解释器，类似于DOS下的command。它接收用户命令（如ls等），然后调用相应的应用程序。">
+<meta name="twitter:image" content="https://wuxianqiang.github.io/2019/07/04/shell/banner.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://wuxianqiang.github.io/2019/07/04/shell/">
+
+
+
+
+
+  <title>shell基础 | 前端精髓</title>
+  
+
+
+
+
+
+
+
+
+</head>
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">前端精髓</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">致力于用技术去推动和改变前端开发</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://wuxianqiang.github.io/2019/07/04/shell/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Qiang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="前端精髓">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">shell基础</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-04T14:08:28+00:00">
+                2019-07-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <img src="/2019/07/04/shell/banner.jpg" title="图片">
+<h2 id="shell是什么？"><a href="#shell是什么？" class="headerlink" title="shell是什么？"></a>shell是什么？</h2><p>Shell基本上是一个命令解释器，类似于DOS下的command。它接收用户命令（如ls等），然后调用相应的应用程序。</p>
+<a id="more"></a>
+<p>不同的组织机构开发了不同的 Shell，常见的 Shell 有 sh、bash、csh、tcsh、ash 等。bash 由 GNU 组织开发，保持了对 sh shell 的兼容性，是各种 Linux 发行版默认配置的 shell。</p>
+<p>查看电脑支持的shell<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/shells</span><br></pre></td></tr></table></figure></p>
+<p>如果你不知道怎么搭建一个Centos7系统，可以参考这篇文章：<a href="https://www.cnblogs.com/wuxianqiang/p/10615201.html" target="_blank" rel="noopener">传送门</a></p>
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><ol>
+<li><code>echo</code> 输出命令</li>
+</ol>
+<p>通过 <code>-e</code> 参数可以支持字符转换，<code>\r\n</code>表示回车换行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# echo hello</span><br><span class="line">第一行</span><br><span class="line">[root@localhost ~]# echo -e &quot;hello\r\nworld&quot;</span><br><span class="line">hello</span><br><span class="line">world</span><br><span class="line">[root@localhost ~]#</span><br></pre></td></tr></table></figure>
+<p>注意上面的代码，有的用了双引号有的没有用，那么接下来讲一下其他符号的用法。</p>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>‘’</td>
+<td>单引号。在双引号里特殊符号都没有特殊含义</td>
+</tr>
+<tr>
+<td>“”</td>
+<td>双引号，在双引号里特殊符号都没有特殊含义，但是 $ ` \ 例外</td>
+</tr>
+<tr>
+<td>`</td>
+<td>反引号，扩起来的是系统命令</td>
+</tr>
+<tr>
+<td>$()</td>
+<td>和反引号一样</td>
+</tr>
+<tr>
+<td>#</td>
+<td>在shell脚本中，#开头的行代表注释</td>
+</tr>
+<tr>
+<td>$</td>
+<td>用于调用变量的值</td>
+</tr>
+<tr>
+<td>\</td>
+<td>转义符号</td>
+</tr>
+</tbody>
+</table>
+<p>单引号和双引号都能关闭shell对特殊字符的处理。不同的是，双引号没有单引号严格，单引号关闭所有有特殊作用的字符，而双引号只要求shell忽略大多数，具体的说，就是①美元符号②反引号③反斜杠，这3种特殊字符不被忽略。 不忽略美元符号意味着shell在双引号内部也进行变量名替换。</p>
+<ol start="2">
+<li>编写执行shell</li>
+</ol>
+<p>shell脚本都是以 <code>.sh</code> 结尾的，新建的文件默认都是没有执行权限的，要自己修改权限。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">// 编辑文件</span><br><span class="line">vi hello.sh</span><br><span class="line">// 输入内容</span><br><span class="line">#!/bin/bash</span><br><span class="line">echo -e &quot;\e[1;34m hello world \e[0m&quot;</span><br><span class="line">// 修改权限</span><br><span class="line">chmod u+x hello.sh</span><br><span class="line">// 执行脚本</span><br><span class="line">./hello.sh</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>历史命令</li>
+</ol>
+<p>可以通过<code>history</code>查看你输入的历史记录，临时输入的命令还在内存中，还没有存到磁盘中，可以通过<code>history -w</code>把它写到磁盘中去，磁盘文件地址是<code>~/.bash_history</code>，默认保存1000条。通过<code>history -c</code>清空历史记录。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# history</span><br><span class="line">   60  ls</span><br><span class="line">   61  history</span><br><span class="line">[root@localhost ~]# !60</span><br><span class="line">// !表示执行第几条命令</span><br></pre></td></tr></table></figure>
+<h2 id="输出重定向"><a href="#输出重定向" class="headerlink" title="输出重定向"></a>输出重定向</h2><p>直接输出内容都是在显示器中显示的，但是可以把输出的内容写入到文件中去，我们称为重定向。输入输出分为3种。</p>
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th>设备文件名</th>
+<th>文件描述符</th>
+<th>类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>键盘</td>
+<td>/dev/stdin</td>
+<td>0</td>
+<td>标准输入</td>
+</tr>
+<tr>
+<td>显示器</td>
+<td>/dev/stdout</td>
+<td>1</td>
+<td>标准输出</td>
+</tr>
+<tr>
+<td>显示器</td>
+<td>/dev/stderr</td>
+<td>2</td>
+<td>标准错误输出</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ls &gt; t.txt</span><br><span class="line">[root@localhost ~]# cat t.txt</span><br><span class="line">anaconda-ks.cfg</span><br><span class="line">app</span><br><span class="line">Dockerfile</span><br><span class="line">hello.sh</span><br><span class="line">original-ks.cfg</span><br><span class="line">package-lock.json</span><br><span class="line">test.js</span><br><span class="line">t.txt</span><br><span class="line">[root@localhost ~]#</span><br></pre></td></tr></table></figure>
+<p>需要使用到的命令</p>
+<ol>
+<li><code>命令 &gt; 文件</code> 将标准输出的内容存放到一个文件中，如果文件中有内容将会被覆盖</li>
+<li><code>命令 &gt;&gt; 文件</code> 将标准输出的内容存放到一个文件中，如果文件中有内容将在末尾追加</li>
+<li><code>命令 &gt;&amp; 文件</code> 默认是不可以把错误输出写入到文件中去，可以通过把标准输出和错误输出一起写到文件中去</li>
+</ol>
+<p>LINUX默认输入是键盘，输出是显示器。你可以用重定向来改变这些设置。比如用wc命令的时候本来是要手动输入一篇文字来计算字符数的，用了重定向后可以直接把一个已经写好的文件用‘&lt;’指向这条命令，就直接可以统计这个文件的字符数等了。输出也是一样，你可以把屏幕输出重定向到一个文件里，再到文件里去看结果。</p>
+<p>wc命令的功能为统计指定文件中的行数、字数、字节数, 并将统计结果显示输出</p>
+<h2 id="多命令顺序执行"><a href="#多命令顺序执行" class="headerlink" title="多命令顺序执行"></a>多命令顺序执行</h2><p>通常情况我们一次要执行多个命令，那么如何保证多个命令的执行顺序呢，就要用到以下符号来处理了。</p>
+<table>
+<thead>
+<tr>
+<th>多命令执行符</th>
+<th>格式</th>
+<th>作用</th>
+<th>案例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>;</code></td>
+<td><code>命令1;命令2</code></td>
+<td>多个命令执行，命令之间没有任何逻辑联系-</td>
+<td><code>echo 1;echo 2;</code></td>
+</tr>
+<tr>
+<td><code>&amp;&amp;</code></td>
+<td><code>命令1&amp;&amp;命令2</code></td>
+<td>逻辑与 当命令1正确执行，则命令2才会执行 当命令1执行不正确，则命令2不会执行-</td>
+<td><code>echo 1&amp;&amp;echo 2;</code></td>
+</tr>
+<tr>
+<td><code>\\</code></td>
+<td><code>命令1\\命令2</code></td>
+<td>逻辑或 当命令1执行不正确，则命令2才会执行 当命令1正确执行，则命令2不会执行-</td>
+<td><code>echo 1\\echo 2;</code></td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li><p><code>命令1|命令2</code> 管道符：命令1的正确输出会作为命令2的操作对象</p>
+</li>
+<li><p>通配符：匹配文件名和目录名</p>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>通配符</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>?</code></td>
+<td>匹配一个任意字符</td>
+</tr>
+<tr>
+<td><code>*</code></td>
+<td>匹配0个或任意字符，也就是可以匹配任意内容</td>
+</tr>
+<tr>
+<td><code>[]</code></td>
+<td>匹配中括号中任意一个字符</td>
+</tr>
+<tr>
+<td><code>[-]</code></td>
+<td>匹配中括号中任意一个字符,-代表范围</td>
+</tr>
+<tr>
+<td><code>[^]</code></td>
+<td>匹配不是中括号中的一个字符</td>
+</tr>
+</tbody>
+</table>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"># Linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/04/vim/" rel="next" title="vi编辑器">
+                <i class="fa fa-chevron-left"></i> vi编辑器
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/04/variable/" rel="prev" title="shell中的变量">
+                shell中的变量 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Qiang</p>
+              <p class="site-description motion-element" itemprop="description">前端开发工程师</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">116</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#shell是什么？"><span class="nav-number">1.</span> <span class="nav-text">shell是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常用命令"><span class="nav-number">2.</span> <span class="nav-text">常用命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#输出重定向"><span class="nav-number">3.</span> <span class="nav-text">输出重定向</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多命令顺序执行"><span class="nav-number">4.</span> <span class="nav-text">多命令顺序执行</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Qiang</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+  <div class="footer-custom">Follow <a target="_blank" href="https://github.com/wuxianqiang">GitHub</a></div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
